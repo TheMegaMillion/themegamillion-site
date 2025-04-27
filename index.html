@@ -82,46 +82,49 @@ document.addEventListener('DOMContentLoaded', function () {
   const lastEl = document.getElementById('tmg-last');
   const buttonEl = document.getElementById('tmg-button');
 
-  buttonEl.addEventListener('click', function () {
-    window.open('https://dexscreener.com/solana/8izbag6pkvh3vgppjysry5f7sawzqsiquvn4vqzzwpmm', '_blank');
-  });
+  if (buttonEl) {
+    buttonEl.onclick = function () {
+      window.open('https://dexscreener.com/solana/8izbag6pkvh3vgppjysry5f7sawzqsiquvn4vqzzwpmm', '_blank');
+    };
+  }
 
   const base = "https://themegamillion.github.io/themegamillion-site/winner.json";
 
   function updateCountdown(countdownEnd) {
-    const now = Math.floor(Date.now() / 1000);
-    const diff = countdownEnd - now;
-
+    var now = Math.floor(Date.now() / 1000);
+    var diff = countdownEnd - now;
     if (diff <= 0) {
       cdEl.textContent = "00:00:00";
     } else {
-      const hours = String(Math.floor(diff / 3600)).padStart(2, '0');
-      const minutes = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
-      const seconds = String(diff % 60).padStart(2, '0');
+      var hours = String(Math.floor(diff / 3600)).padStart(2, '0');
+      var minutes = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
+      var seconds = String(diff % 60).padStart(2, '0');
       cdEl.textContent = hours + ':' + minutes + ':' + seconds;
     }
   }
 
-  async function fetchData() {
-    try {
-      const response = await fetch(base + '?cb=' + Date.now());
-      if (!response.ok) {
-        throw new Error('HTTP error ' + response.status);
+  function fetchData() {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', base + '?cb=' + Date.now(), true);
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        try {
+          var data = JSON.parse(xhr.responseText);
+          if (typeof data.countdownEnd === 'number' && typeof data.amount !== 'undefined') {
+            updateCountdown(data.countdownEnd);
+            setInterval(function () {
+              updateCountdown(data.countdownEnd);
+            }, 1000);
+            lastEl.innerHTML = '🏆 Last Win: <strong>' + data.amount + '</strong> SOL';
+          } else {
+            console.error('Données invalides');
+          }
+        } catch (e) {
+          console.error('Erreur JSON :', e);
+        }
       }
-      const data = await response.json();
-      if (typeof data.countdownEnd !== 'number' || typeof data.amount === 'undefined') {
-        throw new Error('Invalid JSON structure');
-      }
-
-      updateCountdown(data.countdownEnd);
-      setInterval(() => updateCountdown(data.countdownEnd), 1000);
-
-      lastEl.innerHTML = '🏆 Last Win: <strong>' + data.amount + '</strong> SOL';
-    } catch (error) {
-      console.error('Fetch error:', error);
-      cdEl.textContent = '--:--:--';
-      lastEl.innerHTML = '🏆 Last Win: — — — SOL';
-    }
+    };
+    xhr.send();
   }
 
   fetchData();
@@ -130,3 +133,4 @@ document.addEventListener('DOMContentLoaded', function () {
 
 </body>
 </html>
+
