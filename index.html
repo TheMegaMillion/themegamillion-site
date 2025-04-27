@@ -82,11 +82,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const lastEl = document.getElementById('tmg-last');
   const buttonEl = document.getElementById('tmg-button');
 
-  if (!cdEl || !lastEl || !buttonEl) {
-    console.error('❌ Problème HTML.');
-    return;
-  }
-
   buttonEl.addEventListener('click', function () {
     window.open('https://dexscreener.com/solana/8izbag6pkvh3vgppjysry5f7sawzqsiquvn4vqzzwpmm', '_blank');
   });
@@ -103,31 +98,29 @@ document.addEventListener('DOMContentLoaded', function () {
       const hours = String(Math.floor(diff / 3600)).padStart(2, '0');
       const minutes = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
       const seconds = String(diff % 60).padStart(2, '0');
-      cdEl.textContent = ${hours}:${minutes}:${seconds};
+      cdEl.textContent = hours + ':' + minutes + ':' + seconds;
     }
   }
 
   async function fetchData() {
     try {
-      const response = await fetch(${base}?cb=${Date.now()});
+      const response = await fetch(base + '?cb=' + Date.now());
       if (!response.ok) {
-        throw new Error(Erreur HTTP: ${response.status});
+        throw new Error('HTTP error ' + response.status);
       }
       const data = await response.json();
-      
-      if (typeof data.countdownEnd !== "number" || typeof data.amount === "undefined") {
-        throw new Error('Format winner.json invalide.');
+      if (typeof data.countdownEnd !== 'number' || typeof data.amount === 'undefined') {
+        throw new Error('Invalid JSON structure');
       }
 
       updateCountdown(data.countdownEnd);
       setInterval(() => updateCountdown(data.countdownEnd), 1000);
 
-      lastEl.innerHTML = 🏆 Last Win: <strong>${data.amount}</strong> SOL;
-
+      lastEl.innerHTML = '🏆 Last Win: <strong>' + data.amount + '</strong> SOL';
     } catch (error) {
-      console.error('Erreur fetch:', error);
-      cdEl.textContent = "--:--:--";
-      lastEl.innerHTML = "🏆 Last Win: — — — SOL";
+      console.error('Fetch error:', error);
+      cdEl.textContent = '--:--:--';
+      lastEl.innerHTML = '🏆 Last Win: — — — SOL';
     }
   }
 
