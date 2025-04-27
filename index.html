@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TheMegaMillion Draw</title>
+  <style>
+    :root {
+      --title-size: 3rem;
+      --count-size: 5rem;
+      --last-size: 1.5rem;
+      --button-size: 1.5rem;
+      --space-title-count: 2.5rem;
+      --space-count-last: 2.5rem;
+    }
+    #tmg-card {
+      width: 90%;
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 3rem 2rem;
+      background: #111827;
+      border-radius: 16px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.7);
+      text-align: center;
+      color: #e0e0ff;
+      font-family: 'Poppins', sans-serif;
+      box-sizing: border-box;
+    }
+    #tmg-title {
+      font-size: var(--title-size);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: var(--space-title-count);
+      color: #aaaaff;
+    }
+    #tmg-countdown {
+      font-size: var(--count-size);
+      font-weight: 700;
+      color: #ffd700;
+      margin-bottom: var(--space-count-last);
+      text-shadow: 0 0 8px rgba(255,215,0,0.8), 0 0 16px rgba(255,215,0,0.6);
+    }
+    #tmg-last {
+      font-size: var(--last-size);
+      margin-bottom: 2.5rem;
+      color: #c0c0ff;
+    }
+    #tmg-last strong {
+      color: #00ffa3;
+      text-shadow: 0 0 8px rgba(0,255,163,0.7);
+      display: inline-block;
+      white-space: nowrap;
+      overflow-x: auto;
+      max-width: 100%;
+    }
+    #tmg-button {
+      background: linear-gradient(135deg, #00ffa3, #6f00ff);
+      color: #ffffff;
+      border: none;
+      padding: 1rem 3rem;
+      font-size: var(--button-size);
+      font-weight: bold;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(0,255,163,0.7), 0 0 10px rgba(111,0,255,0.7);
+      transition: transform 0.2s ease;
+    }
+    #tmg-button:hover { transform: scale(1.05); }
+  </style>
+</head>
+<body>
+  <div id="tmg-card">
+    <div id="tmg-title">Next Solana Winner Draw</div>
+    <div id="tmg-countdown">--:--:--</div>
+    <div id="tmg-last">🏆 Last Win: — — — SOL</div>
+    <button id="tmg-button">PLAY NOW</button>
+  </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const base = "https://themegamillion.github.io/tmt-winner-feed/winner.json"; // Ton fichier JSON de données
+  const cdEl = document.getElementById('tmg-countdown');
+  const lastEl = document.getElementById('tmg-last');
+  const buttonEl = document.getElementById('tmg-button');
+
+  buttonEl.onclick = function () {
+    window.open('https://dexscreener.com/solana/8izbag6pkvh3vgppjysry5f7sawzqsiquvn4vqzzwpmm', '_blank');
+  };
+
+  let countdownEnd = 0;
+
+  function updateCountdown() {
+    if (!countdownEnd) return;
+    const now = Math.floor(Date.now() / 1000);
+    const diff = countdownEnd - now;
+    if (diff <= 0) {
+      cdEl.textContent = "00:00:00";
+    } else {
+      const hours = String(Math.floor(diff / 3600)).padStart(2, '0');
+      const minutes = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
+      const seconds = String(diff % 60).padStart(2, '0');
+      cdEl.textContent = ${hours}:${minutes}:${seconds};
+    }
+  }
+
+  function fetchData() {
+    fetch(${base}?cb=${Date.now()})
+      .then(response => response.json())
+      .then(data => {
+        if (typeof data.countdownEnd !== "number" || typeof data.amount === "undefined") {
+          throw new Error('Format JSON incorrect');
+        }
+        countdownEnd = data.countdownEnd;
+        lastEl.innerHTML = 🏆 Last Win: <strong>${data.amount}</strong> SOL;
+
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+      })
+      .catch(error => {
+        console.error('❌ Erreur:', error.message);
+        cdEl.textContent = "--:--:--";
+        lastEl.innerHTML = "🏆 Last Win: — — — SOL";
+      });
+  }
+
+  fetchData();
+});
+</script>
+
+</body>
+</html>
